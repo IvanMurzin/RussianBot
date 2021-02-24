@@ -72,8 +72,8 @@ def start_endings(id):
 
 
 def start_stress_in_a_word(id):
-    # sending hint_endings
-    bot.send_message(id, hint_endings)
+    # sending hint stress
+    bot.send_message(id, hint_stress)
     # get or create User class
     user = storage.get(id, User())
     # set cursor of array

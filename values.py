@@ -1,4 +1,4 @@
-API_KEY = "Your api key"
+API_KEY = "1647113965:AAFQuoueIrfOiJ9YZ8rGxjz621fDq1lGc_w"
 
 storage = {}
 
