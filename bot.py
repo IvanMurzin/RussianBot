@@ -1,6 +1,8 @@
 import random
 import telebot
-import time
+import os
+from flask import Flask, request
+import logging
 from values import *
 
 bot = telebot.TeleBot(API_KEY)
@@ -189,72 +191,91 @@ def clear(id):
     user.mistakes_stress = []
 
 
-if __name__ == '__main__':
-    while 1:
-        try:
-            @bot.message_handler(commands=['start', 'help'])
-            def send_help(message):
-                # send help message
-                bot.send_message(message.from_user.id, help_message)
+@bot.message_handler(commands=['start', 'help'])
+def send_help(message):
+    # send help message
+    bot.send_message(message.from_user.id, help_message)
 
 
-            @bot.message_handler(commands=['endings'])
-            def command_endings(message):
-                # safely getting User
-                user = storage.get(message.from_user.id, User())
-                if user.endings or user.stress:
-                    bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
-                    return
-                start_endings(message.from_user.id)
+@bot.message_handler(commands=['endings'])
+def command_endings(message):
+    # safely getting User
+    user = storage.get(message.from_user.id, User())
+    if user.endings or user.stress:
+        bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
+        return
+    start_endings(message.from_user.id)
 
 
-            @bot.message_handler(commands=['stress_in_a_word'])
-            def command_stress_in_a_word(message):
-                # safely getting User
-                user = storage.get(message.from_user.id, User())
-                if user.endings or user.stress:
-                    bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
-                    return
-                start_stress_in_a_word(message.from_user.id)
+@bot.message_handler(commands=['stress_in_a_word'])
+def command_stress_in_a_word(message):
+    # safely getting User
+    user = storage.get(message.from_user.id, User())
+    if user.endings or user.stress:
+        bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
+        return
+    start_stress_in_a_word(message.from_user.id)
 
 
-            @bot.message_handler(commands=['exit'])
-            def command_exit(message):
-                # safely getting User
-                user = storage.get(message.from_user.id, User())
-                if not (user.endings or user.stress):
-                    # send help message
-                    bot.send_message(message.from_user.id, help_message)
-                    return
-                user.endings = []
-                user.stress = []
-                bot.send_message(message.from_user.id, "Всего доброго")
-                # send help message
-                bot.send_message(message.from_user.id, help_message)
+@bot.message_handler(commands=['exit'])
+def command_exit(message):
+    # safely getting User
+    user = storage.get(message.from_user.id, User())
+    if not (user.endings or user.stress):
+        # send help message
+        bot.send_message(message.from_user.id, help_message)
+        return
+    user.endings = []
+    user.stress = []
+    bot.send_message(message.from_user.id, "Всего доброго")
+    # send help message
+    bot.send_message(message.from_user.id, help_message)
 
 
-            @bot.message_handler(commands=['statistics'])
-            def command_statistics(message):
-                show_statistics(message.from_user.id)
+@bot.message_handler(commands=['statistics'])
+def command_statistics(message):
+    show_statistics(message.from_user.id)
 
 
-            @bot.message_handler(commands=['mistakes'])
-            def command_mistakes(message):
-                show_mistakes(message.from_user.id)
+@bot.message_handler(commands=['mistakes'])
+def command_mistakes(message):
+    show_mistakes(message.from_user.id)
 
 
-            @bot.message_handler(commands=['clear'])
-            def command_clear(message):
-                clear(message.from_user.id)
-                bot.send_message(message.from_user.id, "Все чисто")
+@bot.message_handler(commands=['clear'])
+def command_clear(message):
+    clear(message.from_user.id)
+    bot.send_message(message.from_user.id, "Все чисто")
 
 
-            @bot.message_handler(content_types=['text'])
-            def get_text_messages(message):
-                get_message_from_user(message.from_user.id, message.text)
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
+    get_message_from_user(message.from_user.id, message.text)
 
 
-            bot.polling(none_stop=True)
-        except:
-            print("Crashed again")
-        time.sleep(1)
+if "HEROKU" in list(os.environ.keys()):
+    logger = telebot.logger
+    telebot.logger.setLevel(logging.INFO)
+
+    server = Flask(__name__)
+
+
+    @server.route("/bot", methods=['POST'])
+    def getMessage():
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        return "!", 200
+
+
+    @server.route("/")
+    def webhook():
+        bot.remove_webhook()
+        bot.set_webhook(
+            url="https://telegram-russian-bot.herokuapp.com/")
+        return "?", 200
+
+
+    server.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+else:
+    # run from local machine
+    bot.remove_webhook()
+    bot.polling(none_stop=True)
