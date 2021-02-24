@@ -189,72 +189,71 @@ def clear(id):
     user.mistakes_stress = []
 
 
-@bot.message_handler(commands=['start', 'help'])
-def send_help(message):
-    # send help message
-    bot.send_message(message.from_user.id, help_message)
-
-
-@bot.message_handler(commands=['endings'])
-def command_endings(message):
-    # safely getting User
-    user = storage.get(message.from_user.id, User())
-    if user.endings or user.stress:
-        bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
-        return
-    start_endings(message.from_user.id)
-
-
-@bot.message_handler(commands=['stress_in_a_word'])
-def command_stress_in_a_word(message):
-    # safely getting User
-    user = storage.get(message.from_user.id, User())
-    if user.endings or user.stress:
-        bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
-        return
-    start_stress_in_a_word(message.from_user.id)
-
-
-@bot.message_handler(commands=['exit'])
-def command_exit(message):
-    # safely getting User
-    user = storage.get(message.from_user.id, User())
-    if not (user.endings or user.stress):
-        # send help message
-        bot.send_message(message.from_user.id, help_message)
-        return
-    user.endings = []
-    user.stress = []
-    bot.send_message(message.from_user.id, "Всего доброго")
-    # send help message
-    bot.send_message(message.from_user.id, help_message)
-
-
-@bot.message_handler(commands=['statistics'])
-def command_statistics(message):
-    show_statistics(message.from_user.id)
-
-
-@bot.message_handler(commands=['mistakes'])
-def command_mistakes(message):
-    show_mistakes(message.from_user.id)
-
-
-@bot.message_handler(commands=['clear'])
-def command_clear(message):
-    clear(message.from_user.id)
-    bot.send_message(message.from_user.id, "Все чисто")
-
-
-@bot.message_handler(content_types=['text'])
-def get_text_messages(message):
-    get_message_from_user(message.from_user.id, message.text)
-
-
 if __name__ == '__main__':
     while 1:
         try:
+            @bot.message_handler(commands=['start', 'help'])
+            def send_help(message):
+                # send help message
+                bot.send_message(message.from_user.id, help_message)
+
+
+            @bot.message_handler(commands=['endings'])
+            def command_endings(message):
+                # safely getting User
+                user = storage.get(message.from_user.id, User())
+                if user.endings or user.stress:
+                    bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
+                    return
+                start_endings(message.from_user.id)
+
+
+            @bot.message_handler(commands=['stress_in_a_word'])
+            def command_stress_in_a_word(message):
+                # safely getting User
+                user = storage.get(message.from_user.id, User())
+                if user.endings or user.stress:
+                    bot.send_message(message.from_user.id, "Уже идет проверка знаний.")
+                    return
+                start_stress_in_a_word(message.from_user.id)
+
+
+            @bot.message_handler(commands=['exit'])
+            def command_exit(message):
+                # safely getting User
+                user = storage.get(message.from_user.id, User())
+                if not (user.endings or user.stress):
+                    # send help message
+                    bot.send_message(message.from_user.id, help_message)
+                    return
+                user.endings = []
+                user.stress = []
+                bot.send_message(message.from_user.id, "Всего доброго")
+                # send help message
+                bot.send_message(message.from_user.id, help_message)
+
+
+            @bot.message_handler(commands=['statistics'])
+            def command_statistics(message):
+                show_statistics(message.from_user.id)
+
+
+            @bot.message_handler(commands=['mistakes'])
+            def command_mistakes(message):
+                show_mistakes(message.from_user.id)
+
+
+            @bot.message_handler(commands=['clear'])
+            def command_clear(message):
+                clear(message.from_user.id)
+                bot.send_message(message.from_user.id, "Все чисто")
+
+
+            @bot.message_handler(content_types=['text'])
+            def get_text_messages(message):
+                get_message_from_user(message.from_user.id, message.text)
+
+
             bot.polling(none_stop=True)
         except:
             print("Crashed again")
-        time.sleep(3)
