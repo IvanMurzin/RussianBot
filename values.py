@@ -1,4 +1,4 @@
-API_KEY = "1647113965:AAFQuoueIrfOiJ9YZ8rGxjz621fDq1lGc_w"
+API_KEY = "YOUR_API_KEY"
 
 storage = {}
 
@@ -23,6 +23,8 @@ help_message = """
 
 /clear
 Очищает историю проверок знаний
+
+P.S. Если бот внезапно перестал отвечать, то просто отправте сообщение еще раз С:
 """
 
 hint_endings = """
